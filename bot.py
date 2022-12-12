@@ -17,7 +17,7 @@ r = requests
 
 twoip = TwoIP(key = None)
 
-token = '5855942888:AAFqybFV0m3_kgqCWUA1ARSV6Pk7mfc_KT0'
+token = 'add your token....'
 
 bot = telebot.TeleBot(token)
 
