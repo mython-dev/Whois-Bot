@@ -1,8 +1,12 @@
+import subprocess
+import sys
+import os
+from keyboard import *
+import time
 try:
     from twoip import TwoIP
     import socket
     import telebot
-    from keyboard import *
     import requests
 except:
     print('Пожалуйста запустите: pip3 install -r requirements.txt')
@@ -52,6 +56,8 @@ def help(message):
 @bot.message_handler(commands=['whois'])
 
 def whois(message):
+    global site
+
     if len(message.text) < 7:
         bot.send_message(message.chat.id, '''Для того чтобы проверить домен или IP достаточно отправить команду новым сообщением:
 Команды:
@@ -81,11 +87,27 @@ def whois(message):
     except:
         bot.send_message(message.chat.id, 'Ваш лимит закончился, попробуйте позже!!!')
 
+
+
 @bot.callback_query_handler(func=lambda call: True)
 
 def more_information(call):
     if call.data == 'more_info':
-        bot.send_message(call.message.chat.id, 'Пока не работает :(')
+        domen = ' '.join(site)
+        command = (f'whois {domen}')
+        info = subprocess.check_output(command, shell=True)
+
+        bot.send_message(call.message.chat.id, 'Отправляю....')
+
+        time.sleep(3)
+
+
+        if len(info) > 4095:
+            for x in range(0, len(info), 4095):
+                bot.send_message(call.message.chat.id, text=info[x:x+4095], disable_web_page_preview=True)
+        else:
+            bot.send_message(call.message.chat.id, info, disable_web_page_preview=True)
+
 
 
 @bot.message_handler(commands=['checking'])
@@ -107,7 +129,7 @@ def checking(message):
 
         if api_email.text == 'true':
             bot.send_message(message.chat.id, f'E-mail адрес {email} существует')
-        elif api_email.text == 'false':
+        else:
             bot.send_message(message.chat.id, f'E-mail адрес {email} не существует')
     except:
         bot.send_message(message.chat.id, 'Ваш лимит закончился, попробуйте позже!!!')
@@ -116,5 +138,4 @@ def checking(message):
 def text(message):
     bot.send_message(message.chat.id, 'Что-то пошло нет так! нажмите на /start или /help !')
 
-
-bot.infinity_polling()
+bot.polling(none_stop=True)
